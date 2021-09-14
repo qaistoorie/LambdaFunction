@@ -30,24 +30,59 @@ namespace LambdaFunctionT.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync(User request)
+        public async Task<Response> PostAsync(User request)
         {
-            await _context.AddAsync(request);
-            await _context.SaveChangesAsync();
-            return Ok();
+            try
+            {
+                await _context.AddAsync(request);
+                await _context.SaveChangesAsync();
+                return new Response { Message = "Success", Status = "Ok" };
+            }
+            catch (System.Exception ex)
+            {
+                return new Response { Message = ex.Message.ToString(), Status = "Error" };
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PostAsync(int id, User request)
+        public async Task<Response> PutAsync(int id, User request)
         {
-            var model = await _context.Users.FirstOrDefaultAsync(user => user.ID == id);
-            if (model != null)
+            try
             {
-                model.Email = request.Email;
-                model.Username = request.Username;
+                var model = await _context.Users.FirstOrDefaultAsync(user => user.ID == id);
+                if (model != null)
+                {
+                    model.Email = request.Email;
+                    model.Username = request.Username;
+                }
+                await _context.SaveChangesAsync();
+                return new Response { Message = "Success", Status = "Ok" };
             }
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (System.Exception ex)
+            {
+                return new Response { Message = ex.Message, Status = "Error" };
+            }
+
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<Response> Delete(int id)
+        {
+            try
+            {
+                var model = await _context.Users.FirstOrDefaultAsync(user => user.ID == id);
+                if (model != null)
+                {
+                    _context.Remove(model);
+                    await _context.SaveChangesAsync();
+                }
+                return new Response { Message = "Success", Status = "Ok" };
+            }
+            catch (System.Exception ex)
+            {
+                return new Response { Message = ex.Message, Status = "Error" };
+            }
+
         }
     }
 }
